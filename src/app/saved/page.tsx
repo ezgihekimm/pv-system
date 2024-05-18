@@ -1,16 +1,30 @@
 "use client";
-import { deleteExperiment } from "@/store/features/savedData";
+import { SavedDataPacket, deleteExperiment } from "@/store/features/savedData";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 
 export default function SavedData() {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const savedData = useAppSelector((state) => state.savedData.saved);
   const reverseData = savedData.slice().reverse();
 
+  const [selectedForCompare, setSelectedForCompare] = useState<
+    SavedDataPacket[]
+  >([]);
+
   const handleDelete = (id: string) => {
     dispatch(deleteExperiment(id));
   };
+
+  useEffect(() => {
+    if (selectedForCompare.length === 2) {
+      const url = `/compare/${selectedForCompare[0].id}_${selectedForCompare[1].id}`;
+      router.push(url);
+    }
+  }, [selectedForCompare, router]);
 
   return (
     <div>
@@ -42,6 +56,13 @@ export default function SavedData() {
                           1000
                         ).toFixed(0)}{" "}
                         seconds
+                      </span>
+                    </p>
+                    {/* Total Data Points */}
+                    <p className="card-text">
+                      Total Data Points:{" "}
+                      <span style={{ fontWeight: "500" }}>
+                        {data.data.length}
                       </span>
                     </p>
                     {/* Open Close */}
@@ -81,18 +102,39 @@ export default function SavedData() {
                         </span>
                       )}
                     </p>
-                    <a href="#" className="btn btn-outline-primary">
-                      Compare Data
-                    </a>
+                    {selectedForCompare.length < 2 &&
+                      !selectedForCompare.find(
+                        (item) => item.id === data.id
+                      ) && (
+                        <a
+                          className="btn btn-outline-primary me-3"
+                          onClick={() => {
+                            if (selectedForCompare.length < 2) {
+                              setSelectedForCompare([
+                                ...selectedForCompare,
+                                data,
+                              ]);
+                            } else {
+                              alert(
+                                "You can only compare two experiments at a time."
+                              );
+                            }
+                          }}
+                        >
+                          {selectedForCompare.length === 0
+                            ? "Select for Compare"
+                            : "Compare with " +
+                              selectedForCompare[0].experimentName}
+                        </a>
+                      )}
                     <Link
                       prefetch={false}
                       href={"/view/" + data.id}
-                      className="btn btn-primary ms-3"
+                      className="btn btn-primary"
                     >
                       View Data
                     </Link>
                     <a
-                      href="#"
                       className="btn btn-danger ms-3"
                       onClick={() => handleDelete(data.id)}
                     >

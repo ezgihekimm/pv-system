@@ -1,6 +1,7 @@
 "use client";
 
 import LiveChart from "@/components/chart/LiveChart";
+import { useSocket } from "@/components/common/SocketProvider";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -14,6 +15,7 @@ export default function Home() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const isRecording = useAppSelector((state) => state.liveData.isRecording);
+  const { sendMessage } = useSocket();
 
   const [experimentName, setExperimentName] = useState<string>("");
   const [openSolarPanel, setOpenSolarPanel] = useState<boolean>(true);
@@ -25,6 +27,13 @@ export default function Home() {
     if (!experimentName) {
       setExperimentName(`Experiment ${Date.now()}`);
     }
+
+    sendMessage({
+      load: openLoad,
+      battery: openBattery,
+      panel: openSolarPanel,
+    });
+
     dispatch(setRecording(true));
   };
 
@@ -139,40 +148,52 @@ export default function Home() {
       <div className="container-xl">
         <div className="row">
           <div className="col-lg-6">
-            <LiveChart title="Temperature (°C)" dataType={"temp"} />
+            <LiveChart title="Temperature" unit="°C" dataType={"temp"} />
           </div>
           <div className="col-lg-6">
-            <LiveChart title="Irradiation" dataType={"ldr"} />
+            <LiveChart title="Irradiation" unit="%" dataType={"ldr"} />
           </div>
           <div className="col-lg-6">
             <LiveChart
-              title="Battery Voltage (V)"
+              title="Battery Voltage"
+              unit="V"
               dataType={"battery_voltage"}
             />
           </div>
           <div className="col-lg-6">
             <LiveChart
-              title="Battery Current (mA)"
+              title="Battery Current"
+              unit="mA"
               dataType={"battery_current"}
             />
           </div>
           <div className="col-lg-6">
             <LiveChart
-              title="Solar Panel Voltage (V)"
+              title="Solar Panel Voltage"
+              unit="V"
               dataType={"solar_voltage"}
             />
           </div>
           <div className="col-lg-6">
             <LiveChart
-              title="Solar Panel Current (mA)"
+              title="Solar Panel Current"
+              unit="mA"
               dataType={"solar_current"}
             />
           </div>
           <div className="col-lg-6">
-            <LiveChart title="Load Voltage (V)" dataType={"load_voltage"} />
+            <LiveChart
+              title="Load Voltage"
+              unit="V"
+              dataType={"load_voltage"}
+            />
           </div>
           <div className="col-lg-6">
-            <LiveChart title="Load Current (mA)" dataType={"load_current"} />
+            <LiveChart
+              title="Load Current"
+              unit="mA"
+              dataType={"load_current"}
+            />
           </div>
         </div>
       </div>
